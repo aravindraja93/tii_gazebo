@@ -1,0 +1,59 @@
+<?xml version="1.0" ?>
+<!--
+@author: Benjamin Perseghetti
+@email: bperseghetti@rudislabs.com
+-->
+<sdf version='1.7'>
+  <world name='abu_dhabi'>
+    <scene>
+      <ambient>0.5 0.5 0.5 1</ambient>
+      <background>0.15 0.15 0.15 1</background>
+      <shadows>1</shadows>
+      <sky>
+        <clouds>
+          <speed>12</speed>
+        </clouds>
+      </sky>
+      <fog>
+        <type>linear</type>
+        <start>10</start>
+        <end>500</end>
+        <density>1</density>
+      </fog>
+    </scene>
+    <light type="directional" name="sunSolarNoon">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 500 0 0 0</pose>
+      <diffuse>0.95 0.95 0.95 1</diffuse>
+      <specular>0.3 0.3 0.3 1</specular>
+      <attenuation>
+        <range>2000</range>
+        <constant>1.0</constant>
+        <linear>0.0</linear>
+        <quadratic>0.0</quadratic>
+      </attenuation>
+      <direction>-0.01 0.01 -1.0</direction>
+    </light>
+    <gravity>0 0 -9.8</gravity>
+    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+    <atmosphere type='adiabatic'/>
+    <physics type='ode'>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+
+    <include>
+      <uri>model://abu_dhabi</uri>
+      <pose>0 0 -3.5 0 0 0</pose>
+    </include>
+
+    <!--<gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>-1.50024 -204.418 137.241 0 0.487641 1.62819</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>perspective</projection_type>
+      </camera>
+    </gui>-->
+  </world>
+</sdf>
