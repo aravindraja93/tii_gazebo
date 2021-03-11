@@ -11,24 +11,21 @@ import fnmatch
 import numpy as np
 import json
 
-rel_px4_gazebo_path = ".."
+rel_tii_gazebo_path = ".."
 rel_model_path ="../models"
 script_path = os.path.realpath(__file__).replace("jinja_model_gen.py","")
-default_env_path = os.path.relpath(os.path.join(script_path, rel_px4_gazebo_path))
+default_env_path = os.path.relpath(os.path.join(script_path, rel_tii_gazebo_path))
 default_model_path = os.path.relpath(os.path.join(script_path, rel_model_path))
 json_path = os.path.relpath(os.path.join(script_path, "gen_params.json"))
 default_sdf_dict = {
     "iris": 1.6,
     "plane": 1.5,
-    "standard_vtol": 1.5,
-    "r1_rover": 1.6,
-    "nxp_cupcar": 1.5
+    "standard_vtol": 1.5
 }
 hitl_base_model_list = ["iris", "plane", "standard_vtol"]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--json_gen', default=0, help="Use JSON (gen_params.json) for world params, on [1] or off [0]")
     parser.add_argument('--base_model', default="NotSet", help="Base model jinja file EX: iris")
     parser.add_argument('--sdf_version', default="NotSet", help="SDF format version to use for interpreting model file")
     parser.add_argument('--mavlink_tcp_port', default=4560, help="TCP port for PX4 SITL")
@@ -42,28 +39,6 @@ if __name__ == "__main__":
     parser.add_argument('--output_path', help="Path for generated files")
     parser.add_argument('--config_file', default=0, help="Generate config file on [1] or off [0]")
     args = parser.parse_args()
-
-
-    if args.json_gen == 1:
-        with open(json_path) as json_file:
-            json_params = json.load(json_file)["model_params"]
-        
-        args.sdf_version=json_params["sdf_version"]
-        if args.model_name == "NotSet":
-            args.model_name=json_params["model_name"]
-        if args.base_model == "NotSet":
-            args.base_model=json_params["base_model"]
-        if not args.output_path:
-            args.output_path=json_params["output_path"]
-            args.mavlink_tcp_port=json_params["mavlink_tcp_port"]
-            args.mavlink_udp_port=json_params["mavlink_udp_port"]
-        args.serial_enabled=json_params["serial_enabled"]
-        args.serial_device=json_params["serial_device"]
-        args.serial_baudrate=json_params["serial_baudrate"]
-        args.enable_lockstep=json_params["enable_lockstep"]
-        args.config_file=json_params["config_file"]
-        args.hil_mode=json_params["hil_mode"]
-
 
     if args.base_model not in default_sdf_dict:
         print("\nWARNING!!!")
@@ -94,7 +69,6 @@ if __name__ == "__main__":
         exit(1)
 
     if args.hil_mode:
-        args.model_name='temp_{:s}_hitl'.format(args.model_name)
         args.config_file=1
     
     if args.serial_enabled=="NotSet":
@@ -113,15 +87,8 @@ if __name__ == "__main__":
         input_config = os.path.relpath(os.path.join(script_path, "model.config.jinja"))
         template_config = env.get_template(os.path.relpath(input_config, default_env_path))
 
-    try:
-        import rospkg
-        rospack = rospkg.RosPack()
-    except ImportError:
-        pass
-        rospack = None
 
-    d = {'np': np, 'rospack': rospack, \
-         'sdf_version': args.sdf_version, \
+    d = {'sdf_version': args.sdf_version, \
          'mavlink_tcp_port': args.mavlink_tcp_port, \
          'mavlink_udp_port': args.mavlink_udp_port, \
          'serial_enabled': args.serial_enabled, \

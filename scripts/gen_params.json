@@ -21,18 +21,54 @@
 		"output_file": 0,
 		"ode_threads": 2
 	},
-	"model_params": {
-		"base_model": "NotSet",
-		"sdf_version": "NotSet",
-		"mavlink_tcp_port": 4560,
-		"mavlink_udp_port": 14560,
-		"serial_enabled": "NotSet",
-		"serial_device": "/dev/ttyACM0",
-		"serial_baudrate": 921600,
-		"enable_lockstep": "NotSet",
-		"hil_mode": 0,
-		"model_name": "NotSet",
-		"output_path": 0,
-		"config_file": 0
+	"models": {
+		"model_params_0": {
+			"base_model": "iris",
+			"sdf_version": "NotSet",
+			"mavlink_tcp_port": 4560,
+			"mavlink_udp_port": 14560,
+			"serial_enabled": "NotSet",
+			"serial_device": "/dev/ttyACM0",
+			"serial_baudrate": 921600,
+			"enable_lockstep": "NotSet",
+			"rtps": 0,
+			"hil_mode": 0,
+			"model_name": "NotSet",
+			"output_path": 0,
+			"config_file": 0,
+			"spawn_pose": [0, 1, 0, 0, 0, 0]
+		},
+		"model_params_1": {
+			"base_model": "vtol",
+			"sdf_version": "NotSet",
+			"mavlink_tcp_port": 4561,
+			"mavlink_udp_port": 14561,
+			"serial_enabled": "NotSet",
+			"serial_device": "/dev/ttyACM0",
+			"serial_baudrate": 921600,
+			"enable_lockstep": "NotSet",
+			"rtps": 0,
+			"hil_mode": 0,
+			"model_name": "NotSet",
+			"output_path": 0,
+			"config_file": 0,
+			"spawn_pose": [0, 2, 0, 0, 0, 0]
+		},
+		"model_params_2": {
+			"base_model": "plane",
+			"sdf_version": "NotSet",
+			"mavlink_tcp_port": 4562,
+			"mavlink_udp_port": 14562,
+			"serial_enabled": "NotSet",
+			"serial_device": "/dev/ttyACM0",
+			"serial_baudrate": 921600,
+			"enable_lockstep": "NotSet",
+			"rtps": 0,
+			"hil_mode": 0,
+			"model_name": "NotSet",
+			"output_path": 0,
+			"config_file": 0,
+			"spawn_pose": [0, 3, 0, 0, 0, 0]
+		}
 	}
 }
