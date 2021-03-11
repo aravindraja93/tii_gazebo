@@ -1,9 +1,7 @@
 <?xml version="1.0"?>
 <!-- DO NOT EDIT: Generated from standard_vtol.sdf.jinja -->
-{% set model_name = 'standard_vtol' if model_name == 'NotSet' else model_name %}
-{% set sdf_version = '1.5' if sdf_version == 'NotSet' else sdf_version %}
-<sdf version='{{ sdf_version }}'>
-  <model name='{{ model_name }}'>
+<sdf version='1.5'>
+  <model name='standard_vtol'>
     <pose>0 0 0.246 0 0 0</pose>
     <link name='base_link'>
       <pose>0 0 0 0 0 0</pose>
@@ -147,7 +145,7 @@
       <velocity_decay/>
       <self_collide>0</self_collide>
     </link>
-    <link name='{{ model_name }}/imu_link'>
+    <link name='standard_vtol/imu_link'>
       <pose>0 0 0 0 0 0</pose>
       <inertial>
         <pose>0 0 0 0 0 0</pose>
@@ -162,8 +160,8 @@
         </inertia>
       </inertial>
     </link>
-    <joint name='{{ model_name }}/imu_joint' type='revolute'>
-      <child>{{ model_name }}/imu_link</child>
+    <joint name='standard_vtol/imu_joint' type='revolute'>
+      <child>standard_vtol/imu_link</child>
       <parent>base_link</parent>
       <axis>
         <xyz>1 0 0</xyz>
@@ -180,7 +178,7 @@
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
     </joint>
-    <link name='{{ model_name }}/airspeed_link'>
+    <link name='standard_vtol/airspeed_link'>
       <pose>0 0 0 0 0 0</pose>
       <inertial>
         <pose>0 0 0 0 0 0</pose>
@@ -195,8 +193,8 @@
         </inertia>
       </inertial>
     </link>
-    <joint name='{{ model_name }}/airspeed_joint' type='revolute'>
-      <child>{{ model_name }}/airspeed_link</child>
+    <joint name='standard_vtol/airspeed_joint' type='revolute'>
+      <child>standard_vtol/airspeed_link</child>
       <parent>base_link</parent>
       <axis>
         <xyz>1 0 0</xyz>
@@ -725,7 +723,7 @@
       <parent>base_link</parent>
     </joint>
     <plugin name="left_wing_lift" filename="libLiftDragPlugin.so">
-      <a0>0.05984281113</a0>
+      <alpha0>0.05984281113</alpha0>
       <cla>4.752798721</cla>
       <cda>0.6417112299</cda>
       <cma>0.0</cma>
@@ -742,12 +740,12 @@
       <control_joint_name>
         left_elevon_joint
       </control_joint_name>
-      <control_joint_rad_to_cl>-1.0</control_joint_rad_to_cl>
+      <cl_delta>-1.0</cl_delta>
       <robotNamespace></robotNamespace>
       <windSubTopic>world_wind</windSubTopic>
     </plugin>
     <plugin name="right_wing_lift" filename="libLiftDragPlugin.so">
-      <a0>0.05984281113</a0>
+      <alpha0>0.05984281113</alpha0>
       <cla>4.752798721</cla>
       <cda>0.6417112299</cda>
       <cma>0.0</cma>
@@ -764,12 +762,12 @@
       <control_joint_name>
         right_elevon_joint
       </control_joint_name>
-      <control_joint_rad_to_cl>-1.0</control_joint_rad_to_cl>
+      <cl_delta>-1.0</cl_delta>
       <robotNamespace></robotNamespace>
       <windSubTopic>world_wind</windSubTopic>
     </plugin>
     <plugin name="elevator_lift" filename="libLiftDragPlugin.so">
-      <a0>-0.2</a0>
+      <alpha0>-0.2</alpha0>
       <cla>4.752798721</cla>
       <cda>0.6417112299</cda>
       <cma>0.0</cma>
@@ -786,12 +784,12 @@
       <control_joint_name>
         elevator_joint
       </control_joint_name>
-      <control_joint_rad_to_cl>-12.0</control_joint_rad_to_cl>
+      <cl_delta>-12.0</cl_delta>
       <robotNamespace></robotNamespace>
       <windSubTopic>world_wind</windSubTopic>
     </plugin>
     <plugin name="rudder_lift" filename="libLiftDragPlugin.so">
-      <a0>0.0</a0>
+      <alpha0>0.0</alpha0>
       <cla>4.752798721</cla>
       <cda>0.6417112299</cda>
       <cma>0.0.</cma>
@@ -895,7 +893,7 @@
     </plugin>
     <plugin name='gazebo_imu_plugin' filename='libgazebo_imu_plugin.so'>
       <robotNamespace></robotNamespace>
-      <linkName>{{ model_name }}/imu_link</linkName>
+      <linkName>standard_vtol/imu_link</linkName>
       <imuTopic>/imu</imuTopic>
       <gyroscopeNoiseDensity>0.0003394</gyroscopeNoiseDensity>
       <gyroscopeRandomWalk>3.8785e-05</gyroscopeRandomWalk>
@@ -924,16 +922,16 @@
     </plugin>
     <plugin name='airspeed_plugin' filename='libgazebo_airspeed_plugin.so'>
       <robotNamespace/>
-      <linkName>{{ model_name }}/airspeed_link</linkName>
+      <linkName>standard_vtol/airspeed_link</linkName>
     </plugin>
     <plugin name='mavlink_interface' filename='libgazebo_mavlink_interface.so'>
-      <robotNamespace/>
+      <robotNamespace></robotNamespace>
       <imuSubTopic>/imu</imuSubTopic>
       <magSubTopic>/mag</magSubTopic>
       <baroSubTopic>/baro</baroSubTopic>
       <mavlink_addr>INADDR_ANY</mavlink_addr>
-      <mavlink_udp_port>{{ mavlink_udp_port }}</mavlink_udp_port>
       <mavlink_tcp_port>{{ mavlink_tcp_port }}</mavlink_tcp_port>
+      <mavlink_udp_port>{{ mavlink_udp_port }}</mavlink_udp_port>
       <serialEnabled>{{ serial_enabled }}</serialEnabled>
       <serialDevice>{{ serial_device }}</serialDevice>
       <baudRate>{{ serial_baudrate }}</baudRate>
@@ -942,11 +940,9 @@
       <sdk_addr>INADDR_ANY</sdk_addr>
       <sdk_udp_port>14540</sdk_udp_port>
       <hil_mode>{{ hil_mode }}</hil_mode>
-      <hil_state_level>0</hil_state_level>
-      <send_vision_estimation>0</send_vision_estimation>
-      <send_odometry>1</send_odometry>
-      <enable_lockstep>{{ enable_lockstep }}</enable_lockstep>
-      <use_tcp>1</use_tcp>
+      <hil_state_level>false</hil_state_level>
+      <enable_lockstep>true</enable_lockstep>
+      <use_tcp>true</use_tcp>
       <motorSpeedCommandPubTopic>/gazebo/command/motor_speed</motorSpeedCommandPubTopic>
       <control_channels>
         <channel name="rotor0">

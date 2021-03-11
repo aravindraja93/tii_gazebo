@@ -60,7 +60,7 @@ if __name__ == "__main__":
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(default_env_path))
     template_model = env.get_template(os.path.relpath(input_filename, default_env_path))
     
-    if (args.base_model not in hitl_base_model_list) and args.hil_mode:
+    if (args.base_model not in hitl_base_model_list) and int(args.hil_mode):
         print("\nWARNING!!!")
         print('Model name: "{:s}" DOES NOT MATCH any entries for HITL in hitl_base_model_list.\nTry HITL capable model name:'.format(args.model_name))
         for hitl_model_option in hitl_base_model_list:
@@ -68,11 +68,11 @@ if __name__ == "__main__":
         print("\nEXITING jinja_model_gen.py...\n")
         exit(1)
 
-    if args.hil_mode:
+    if int(args.hil_mode):
         args.config_file=1
     
     if args.serial_enabled=="NotSet":
-        if args.hil_mode:
+        if int(args.hil_mode):
             args.serial_enabled=1
         else:
             args.serial_enabled=0
@@ -83,7 +83,7 @@ if __name__ == "__main__":
         else:
             args.enable_lockstep=1
 
-    if args.config_file: 
+    if int(args.config_file): 
         input_config = os.path.relpath(os.path.join(script_path, "model.config.jinja"))
         template_config = env.get_template(os.path.relpath(input_config, default_env_path))
 
@@ -99,10 +99,10 @@ if __name__ == "__main__":
          'hil_mode': args.hil_mode}
 
     model_result = template_model.render(d)
-    if args.output_path and not args.hil_mode:
+    if args.output_path and not int(args.hil_mode):
         model_out = os.path.relpath(os.path.join(args.output_path, '{:s}.sdf'.format(args.model_name)))
     else:
-        if args.hil_mode:
+        if int(args.hil_mode):
             print(default_model_path)
             print(args.model_name)
             rel_hitl_path = os.path.relpath(os.path.join(default_model_path, args.model_name))
@@ -118,7 +118,7 @@ if __name__ == "__main__":
         m_out.write(model_result)
     
 
-    if args.config_file:
+    if int(args.config_file):
         config_result = template_config.render(d)
         if args.output_path and not args.hil_mode:
             config_out = os.path.relpath(os.path.join(args.output_path, 'model.config'))

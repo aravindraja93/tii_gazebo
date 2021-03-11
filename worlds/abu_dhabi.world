@@ -3,8 +3,8 @@
 @author: Benjamin Perseghetti
 @email: bperseghetti@rudislabs.com
 -->
-<sdf version='1.7'>
-  <world name='abu_dhabi'>
+<sdf version='1.5'>
+  <world name='abu_dhabi_world'>
     <scene>
       <ambient>0.5 0.5 0.5 1</ambient>
       <background>0.15 0.15 0.15 1</background>
@@ -38,13 +38,13 @@
     <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
     <atmosphere type='adiabatic'/>
     <physics type='ode'>
-      <max_step_size>0.001</max_step_size>
+      <max_step_size>0.004</max_step_size>
       <real_time_factor>1</real_time_factor>
-      <real_time_update_rate>1000</real_time_update_rate>
+      <real_time_update_rate>250</real_time_update_rate>
     </physics>
 
     <include>
-      <uri>model://abu_dhabi</uri>
+      <uri>model://abu_dhabi_model</uri>
       <pose>0 0 -3.5 0 0 0</pose>
     </include>
 
