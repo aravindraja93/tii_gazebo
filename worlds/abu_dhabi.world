@@ -42,10 +42,15 @@
       <real_time_factor>1</real_time_factor>
       <real_time_update_rate>250</real_time_update_rate>
     </physics>
-
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <latitude_deg>24.495296</latitude_deg>
+      <longitude_deg>54.3764920</longitude_deg>
+      <elevation>0</elevation>
+    </spherical_coordinates>
     <include>
       <uri>model://abu_dhabi_model</uri>
-      <pose>0 0 -3.5 0 0 0</pose>
+      <pose>0 0 0 0 0 0</pose>
     </include>
 
     <!--<gui fullscreen='0'>
