@@ -7,22 +7,18 @@ Generate Models
 import jinja2
 import argparse
 import os
-import fnmatch
 import numpy as np
-import json
 
-rel_tii_gazebo_path = ".."
+rel_gazebo_path = ".."
 rel_model_path ="../models"
 script_path = os.path.realpath(__file__).replace("jinja_model_gen.py","")
-default_env_path = os.path.relpath(os.path.join(script_path, rel_tii_gazebo_path))
+default_env_path = os.path.relpath(os.path.join(script_path, rel_gazebo_path))
 default_model_path = os.path.relpath(os.path.join(script_path, rel_model_path))
-json_path = os.path.relpath(os.path.join(script_path, "gen_params.json"))
 default_sdf_dict = {
     "iris": 1.6,
     "plane": 1.5,
     "standard_vtol": 1.5
 }
-hitl_base_model_list = ["iris", "plane", "standard_vtol"]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -38,8 +34,6 @@ if __name__ == "__main__":
     parser.add_argument('--enable_lockstep', default="NotSet", help="Enable lockstep for simulation")
     parser.add_argument('--hil_mode', default=0, help="Enable HIL mode for HITL simulation")
     parser.add_argument('--model_name', default="NotSet", help="Model to be used in jinja files")
-    parser.add_argument('--output_path', help="Path for generated files")
-    parser.add_argument('--config_file', default=0, help="Generate config file on [1] or off [0]")
     args = parser.parse_args()
 
     if args.base_model not in default_sdf_dict:
@@ -52,43 +46,19 @@ if __name__ == "__main__":
 
     if args.model_name == "NotSet":
         args.model_name = args.base_model
-        print('Model name is NOT EXPLICITLY SET, setting to base model name: "{:s}"'.format(args.model_name))
     
     if args.sdf_version == "NotSet":
         args.sdf_version = default_sdf_dict.get(args.base_model)
-        print('SDF version is NOT EXPLICITLY SET, base model name: "{:s}" is using default SDF version: {:s}'.format(args.base_model, str(args.sdf_version)))
         
     input_filename = os.path.relpath(os.path.join(default_model_path, '{:s}/{:s}.sdf.jinja'.format(args.base_model,args.base_model)))
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(default_env_path))
     template_model = env.get_template(os.path.relpath(input_filename, default_env_path))
     
-    if (args.base_model not in hitl_base_model_list) and int(args.hil_mode):
-        print("\nWARNING!!!")
-        print('Model name: "{:s}" DOES NOT MATCH any entries for HITL in hitl_base_model_list.\nTry HITL capable model name:'.format(args.model_name))
-        for hitl_model_option in hitl_base_model_list:
-            print('\t{:s}'.format(hitl_model_option))
-        print("\nEXITING jinja_model_gen.py...\n")
-        exit(1)
-
-    if int(args.hil_mode):
-        args.config_file=1
-    
     if args.serial_enabled=="NotSet":
-        if int(args.hil_mode):
-            args.serial_enabled=1
-        else:
-            args.serial_enabled=0
+        args.serial_enabled=0
 
     if args.enable_lockstep=="NotSet":
-        if args.hil_mode:
-            args.enable_lockstep=0
-        else:
-            args.enable_lockstep=1
-
-    if int(args.config_file): 
-        input_config = os.path.relpath(os.path.join(script_path, "model.config.jinja"))
-        template_config = env.get_template(os.path.relpath(input_config, default_env_path))
-
+        args.enable_lockstep=1
 
     d = {'sdf_version': args.sdf_version, \
          'mavlink_tcp_port': args.mavlink_tcp_port, \
@@ -103,38 +73,8 @@ if __name__ == "__main__":
          'hil_mode': args.hil_mode}
 
     model_result = template_model.render(d)
-    if args.output_path and not int(args.hil_mode):
-        model_out = os.path.relpath(os.path.join(args.output_path, '{:s}.sdf'.format(args.model_name)))
-    else:
-        if int(args.hil_mode):
-            print(default_model_path)
-            print(args.model_name)
-            rel_hitl_path = os.path.relpath(os.path.join(default_model_path, args.model_name))
-            print(rel_hitl_path)
-            if not os.path.exists(rel_hitl_path):
-                os.makedirs(rel_hitl_path, exist_ok=True)
-            model_out = os.path.relpath(os.path.join(rel_hitl_path, '{:s}.sdf'.format(args.model_name)))
-        else:
-            model_out = input_filename.replace('.sdf.jinja', '.sdf')
+    model_out = '/tmp/{:s}.sdf'.format(args.model_name)
 
     with open(model_out, 'w') as m_out:
         print(('{:s} -> {:s}'.format(input_filename, model_out)))
         m_out.write(model_result)
-    
-
-    if int(args.config_file):
-        config_result = template_config.render(d)
-        if args.output_path and not args.hil_mode:
-            config_out = os.path.relpath(os.path.join(args.output_path, 'model.config'))
-        else:
-            if args.hil_mode:
-                rel_hitl_path = os.path.relpath(os.path.join(default_model_path, args.model_name))
-                if not os.path.exists(rel_hitl_path):
-                    os.makedirs(rel_hitl_path, exist_ok=True)
-                config_out = os.path.relpath(os.path.join(rel_hitl_path, 'model.config'))
-            else:
-                config_out = input_filename.replace('{:s}.sdf.jinja'.format(args.base_model), 'model.config')
-
-        with open(config_out, 'w') as c_out:
-            print(('{:s} -> {:s}'.format(input_config, config_out)))
-            c_out.write(config_result)
