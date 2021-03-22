@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <!-- Generated from standard_vtol.sdf.jinja -->
-{% set model_name = 'standard_vtol' if model_name == 'NotSet' else model_name %}
-{% set sdf_version = '1.5' if sdf_version == 'NotSet' else sdf_version %}
+{%- set model_name = 'standard_vtol' if model_name == 'NotSet' else model_name -%}
+{%- set sdf_version = '1.5' if sdf_version == 'NotSet' else sdf_version -%}
+{%- set gps_model_name = gps if gps_model_name == 'NotSet' else gps_model_name -%}
 <sdf version='{{ sdf_version }}'>
   <model name='{{ model_name }}'>
     <pose>0 0 0.246 0 0 0</pose>
@@ -716,12 +717,12 @@
       </physics>
     </joint>
     <include>
-      <uri>model://gps</uri>
+      <uri>model://{{ gps_model_name }}</uri>
       <pose>0 0 0 0 0 0</pose>
-      <name>gps</name>
+      <name>{{ gps_model_name }}</name>
     </include>
     <joint name='gps_joint' type='fixed'>
-      <child>gps::link</child>
+      <child>{{ gps_model_name }}::link</child>
       <parent>base_link</parent>
     </joint>
     <plugin name="left_wing_lift" filename="libLiftDragPlugin.so">

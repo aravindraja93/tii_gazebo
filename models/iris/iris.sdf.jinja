@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- Generated from iris.sdf.jinja -->
-{% set model_name = 'iris' if model_name == 'NotSet' else model_name %}
-{% set sdf_version = '1.6' if sdf_version == 'NotSet' else sdf_version %}
+{%- set model_name = 'iris' if model_name == 'NotSet' else model_name -%}
+{%- set sdf_version = '1.6' if sdf_version == 'NotSet' else sdf_version -%}
 <sdf version='{{ sdf_version }}'>
   <model name='{{ model_name }}'>
     <link name='base_link'>
@@ -455,6 +455,12 @@
           <plugin name='gps_plugin' filename='libgazebo_gps_plugin.so'>
             <robotNamespace/>
             <gpsNoise>1</gpsNoise>
+          {%- if gps_attack_time != 'NotSet' or  gps_attack_rate != 'NotSet' -%}  
+            {%- set gps_attack_time = 30 if gps_attack_time == 'NotSet' else gps_attack_time -%}
+            {%- set gps_attack_rate = 0.1 if gps_attack_rate == 'NotSet' else gps_attack_rate -%}
+            <gps_attack_time>{{ gps_attack_time }}</gps_attack_time>
+            <gps_attack_rate>{{ gps_attack_rate }}</gps_attack_rate>
+          {% endif %}
             <gpsXYRandomWalk>2.0</gpsXYRandomWalk>
             <gpsZRandomWalk>4.0</gpsZRandomWalk>
             <gpsXYNoiseDensity>0.0002</gpsXYNoiseDensity>
