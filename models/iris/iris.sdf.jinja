@@ -452,12 +452,7 @@
         </visual>
         <sensor name='gps' type='gps'>
           <pose>0 0 0 0 0 0</pose>
-        {%- if gps_attack_time != 'NotSet' or  gps_attack_rate != 'NotSet' %}  
           <plugin name='gps_plugin' filename='libgazebo_gps_plugin.so'>
-        {%- endif %}
-        {%- if gps_attack_time == 'NotSet' and  gps_attack_rate == 'NotSet' %}  
-          <plugin name='gps_plugin' filename='libgazebo_gps_plugin.so'>
-        {%- endif %}
             <robotNamespace/>
             <gpsNoise>1</gpsNoise>
           {%- if gps_attack_time != 'NotSet' or  gps_attack_rate != 'NotSet' %}  

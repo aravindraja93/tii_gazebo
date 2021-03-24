@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
 <!-- Generated from gps.sdf.jinja -->
-{%- set gps_model_name = gps if gps_model_name == 'NotSet' else gps_model_name -%}
-<sdf version="1.6">
+{%- set sdf_version = '1.6' if sdf_version == 'NotSet' else sdf_version -%}
+{%- set gps_model_name = gps if gps_model_name == 'NotSet' else gps_model_name %}
+<sdf version='{{ sdf_version }}'>
   <model name='{{ gps_model_name }}'>
     <link name="link">
       <pose>0 0 0 0 0 0</pose>

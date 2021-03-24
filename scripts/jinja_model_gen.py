@@ -87,16 +87,16 @@ if __name__ == "__main__":
 
     if args.gps_model_name != "NotSet" and args.gps_model_name != "gps":
         
-        if (not os.path.isdir('/tmp/models/gps')):
+        if (not os.path.isdir('/tmp/models/{:s}'.format(args.gps_model_name))):
             try: 
-                os.makedirs('/tmp/models/gps', exist_ok = True) 
+                os.makedirs('/tmp/models/{:s}'.format(args.gps_model_name), exist_ok = True) 
             except OSError as error: 
                 print("Directory creation error.")
 
         input_gps = os.path.relpath(os.path.join(default_model_path, 'gps/gps.sdf.jinja'))
         template_gps = env.get_template(os.path.relpath(input_gps, default_env_path))
         gps_result = template_gps.render(d)
-        gps_out = '/tmp/models/gps/{:s}.sdf'.format(args.gps_model_name)
+        gps_out = '/tmp/models/{:s}/{:s}.sdf'.format(args.gps_model_name, args.gps_model_name)
         with open(gps_out, 'w') as g_out:
             print(('{:s} -> {:s}'.format("gps/gps.sdf.jinja", gps_out)))
             g_out.write(gps_result)
@@ -104,7 +104,7 @@ if __name__ == "__main__":
         input_gps_config = os.path.relpath(os.path.join(default_model_path, 'gps/model.config.jinja'))
         template_gps_config = env.get_template(os.path.relpath(input_gps_config, default_env_path))
         gps_result_config = template_gps_config.render(d)
-        gps_out_config = '/tmp/models/gps/model.config'
+        gps_out_config = '/tmp/models/{:s}/model.config'.format(args.gps_model_name)
         with open(gps_out_config, 'w') as gc_out:
             print(('{:s} -> {:s}'.format("gps/model.config.jinja", gps_out_config)))
             gc_out.write(gps_result_config)
