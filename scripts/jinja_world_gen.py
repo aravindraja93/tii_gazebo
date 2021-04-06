@@ -29,7 +29,8 @@ default_sdf_world_dict = {
     "warehouse": 1.5,
     "typhoon": 1.5,
     "abu_dhabi": 1.5,
-    "raceway": 1.5
+    "raceway": 1.5,
+    "canvas": 1.5
 }
 
 if __name__ == "__main__":

@@ -28,10 +28,10 @@ Generated with jinja_world_gen.py
     {%- endif %}
     {%- if fog_params != "NotSet" %}
       <fog>
-        <type>fog_dict.type</type>
-        <start>fog_dict.start_m</start>
-        <end>fog_dict.end_m</end>
-        <density>fog_dict.density</density>
+        <type>{{ fog_params.type }}</type>
+        <start>{{ fog_params.start_m }}</start>
+        <end>{{ fog_params.end_m }}</end>
+        <density>{{ fog_params.density }}</density>
       </fog>
     {%- endif %}
     </scene>
@@ -110,6 +110,11 @@ Generated with jinja_world_gen.py
   {%- if world_name == 'boat' %}
     <include>
       <uri>model://water_level</uri>
+    </include>
+  {%- endif %}
+  {%- if world_name == 'canvas' %}
+    <include>
+      <uri>model://ground_plane</uri>
     </include>
   {%- endif %}
   {%- if world_name == 'abu_dhabi' %}
