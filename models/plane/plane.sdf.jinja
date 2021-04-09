@@ -72,7 +72,7 @@
         </inertia>
       </inertial>
     </link>
-    <joint name='{{ model_name }}/imu_joint' type='revolute'>
+    <joint name='imu_{{ model_name }}_joint' type='revolute'>
       <child>{{ model_name }}/imu_link</child>
       <parent>base_link</parent>
       <axis>
@@ -93,10 +93,10 @@
     <include>
       <uri>model://airspeed</uri>
       <pose>0 0 0 0 0 0</pose>
-      <name>airspeed</name>
+      <name>airspeed_{{ model_name }}</name>
     </include>
-    <joint name='airspeed_joint' type='fixed'>
-      <child>airspeed::link</child>
+    <joint name='airspeed_{{ model_name }}_joint' type='fixed'>
+      <child>airspeed_{{ model_name }}::link</child>
       <parent>base_link</parent>
     </joint>
     <link name='rotor_puller'>
@@ -466,59 +466,15 @@
         </ode>
       </physics>
     </joint>
-    <model name='gps2'>
-      <link name='link'>
-        <pose>0 0 0 0 0 0</pose>
-        <inertial>
-          <pose>0 0 0 0 0 0</pose>
-          <mass>0.01</mass>
-          <inertia>
-            <ixx>2.1733e-06</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>2.1733e-06</iyy>
-            <iyz>0</iyz>
-            <izz>1.8e-07</izz>
-          </inertia>
-        </inertial>
-        <visual name='visual'>
-          <geometry>
-            <cylinder>
-              <radius>0.01</radius>
-              <length>0.002</length>
-            </cylinder>
-          </geometry>
-          <material>
-            <script>
-              <name>Gazebo/Black</name>
-              <uri>__default__</uri>
-            </script>
-          </material>
-        </visual>
-        <sensor name='gps' type='gps'>
-          <pose>0 0 0 0 0 0</pose>
-          <plugin name='gps_plugin' filename='libgazebo_gps_plugin.so'>
-            <robotNamespace/>
-            <gpsNoise>1</gpsNoise>
-          {%- if gps_attack_time != 'NotSet' or  gps_attack_rate != 'NotSet' %}  
-            {%- set gps_attack_time = 30 if gps_attack_time == 'NotSet' else gps_attack_time -%}
-            {%- set gps_attack_rate = 0.1 if gps_attack_rate == 'NotSet' else gps_attack_rate %}
-            <gpsAttackTime>{{ gps_attack_time }}</gpsAttackTime>
-            <gpsAttackRate>{{ gps_attack_rate }}</gpsAttackRate>
-          {%- endif %}
-            <gpsXYRandomWalk>2.0</gpsXYRandomWalk>
-            <gpsZRandomWalk>4.0</gpsZRandomWalk>
-            <gpsXYNoiseDensity>0.0002</gpsXYNoiseDensity>
-            <gpsZNoiseDensity>0.0004</gpsZNoiseDensity>
-            <gpsVXYNoiseDensity>0.2</gpsVXYNoiseDensity>
-            <gpsVZNoiseDensity>0.4</gpsVZNoiseDensity>
-          </plugin>
-        </sensor>
-      </link>
-    </model>
-    <joint name='gps2_joint' type='fixed'>
+    {%- set gps_model_name = "gps" if gps_model_name == 'NotSet' else gps_model_name %}
+    <include>
+      <uri>model://{{ gps_model_name }}</uri>
+      <pose>0 0 0 0 0 0</pose>
+      <name>gps_{{ model_name }}</name>
+    </include>
+    <joint name='gps_{{ model_name }}_joint' type='fixed'>
+      <child>gps_{{ model_name }}::link</child>
       <parent>base_link</parent>
-      <child>gps2::link</child>
     </joint>
     <plugin name="left_wing" filename="libLiftDragPlugin.so">
       <a0>0.05984281113</a0>

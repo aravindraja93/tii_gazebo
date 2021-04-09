@@ -28,10 +28,11 @@
         <material>
           <script>
             <name>Gazebo/Black</name>
+            <uri>__default__</uri>
           </script>
         </material>
       </visual>
-      <sensor name="gps" type="gps">
+      <sensor name="{{ gps_model_name }}" type="gps">
         <pose>0 0 0 0 0 0</pose>
         <update_rate>5.0</update_rate>
         <always_on>true</always_on>
@@ -48,8 +49,8 @@
         {%- if gps_attack_time != 'NotSet' or  gps_attack_rate != 'NotSet' -%}  
           {%- set gps_attack_time = 30 if gps_attack_time == 'NotSet' else gps_attack_time -%}
           {% set gps_attack_rate = 0.1 if gps_attack_rate == 'NotSet' else gps_attack_rate %}
-          <gps_attack_time>{{ gps_attack_time }}</gps_attack_time>
-          <gps_attack_rate>{{ gps_attack_rate }}</gps_attack_rate>
+          <gpsAttackTime>{{ gps_attack_time }}</gpsAttackTime>
+          <gpsAttackRate>{{ gps_attack_rate }}</gpsAttackRate>
         {%- endif -%}
         </plugin>
       </sensor>

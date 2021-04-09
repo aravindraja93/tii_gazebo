@@ -8,6 +8,11 @@ import jinja2
 import argparse
 import os
 import numpy as np
+import json
+import shlex
+import sys
+import subprocess
+import ast
 
 rel_gazebo_path = ".."
 rel_model_path ="../models"
@@ -36,7 +41,7 @@ if __name__ == "__main__":
     parser.add_argument('--gps_attack_time', default="NotSet", help="GPS attack time sec")
     parser.add_argument('--gps_attack_rate', default="NotSet", help="GPS attack rate m/s")
     parser.add_argument('--gps_model_name', default="NotSet", help="GPS model name")
-    parser.add_argument('--camera_image', default="NotSet", help="Name of camera image topic.")
+    parser.add_argument('--sensors', default="NotSet", help="Sensors dictionary.")
     parser.add_argument('--namespace', default="NotSet", help="Namespace of robot.")
     parser.add_argument('--hil_mode', default=0, help="Enable HIL mode for HITL simulation")
     parser.add_argument('--model_name', default="NotSet", help="Model to be used in jinja files")
@@ -44,6 +49,14 @@ if __name__ == "__main__":
 
     if args.namespace == "":
         args.namespace = "NotSet"
+
+    if args.sensors != "NotSet":
+        try:
+            args.sensors = ast.literal_eval(args.sensors)
+        except:
+            print("Failed to read passed sensors dictionary")
+            args.sensors = "NotSet"
+            pass
 
     if args.base_model not in default_sdf_dict:
         print("\nWARNING!!!")
@@ -58,6 +71,26 @@ if __name__ == "__main__":
     
     if args.sdf_version == "NotSet":
         args.sdf_version = default_sdf_dict.get(args.base_model)
+
+    if args.sensors != "NotSet":
+        sensors = args.sensors
+        for sensor in sensors:
+            if sensors[sensor]["method"] == "include":
+    
+                generate_sensor_args = ' --sdf_version "{:s}" --namespace "{:s}" --params "{:s}"'.format(
+                    str(args.sdf_version), str(args.namespace), str(sensors[sensor]["params"]))
+                
+                generate_sensor_cmd = 'python3 {:s}/jinja_sensor_gen.py{:s}'.format(
+                    script_path, generate_sensor_args).replace("\n","").replace("    ","")
+                sensor_cmd_popen=shlex.split(generate_sensor_cmd)
+                sensor_popen = subprocess.Popen(sensor_cmd_popen, stdout=subprocess.PIPE, text=True)
+                while True:
+                    output = sensor_popen.stdout.readline()
+                    if output == '' and sensor_popen.poll() is not None:
+                        break
+                    if output:
+                        print(output.strip())
+                    sensor_popen.wait()
         
     input_filename = os.path.relpath(os.path.join(default_model_path, '{:s}/{:s}.sdf.jinja'.format(args.base_model,args.base_model)))
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(default_env_path))
@@ -83,7 +116,7 @@ if __name__ == "__main__":
          'gps_attack_rate': args.gps_attack_rate, \
          'gps_model_name': args.gps_model_name, \
          'model_name': args.model_name, \
-         'camera_image': args.camera_image, \
+         'sensors': args.sensors, \
          'namespace': args.namespace, \
          'hil_mode': args.hil_mode}
 
