@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+    <model name="ddcr">
+      <static>true</static>
+     <link name="terrain">
+      <visual name="visual">
+        <geometry>
+          <mesh><uri>model://ddcr/media/terrain.dae</uri></mesh>
+        </geometry>
+        <pose>19.5 7.30 -76 0 0 0</pose>
+      </visual>
+      <collision name="collision">
+       <geometry>
+          <mesh><uri>model://ddcr/media/terrain.dae</uri></mesh>
+        </geometry>
+        <pose>19.5 7.30 -76 0 0 0</pose>
+      </collision>
+    </link>
+     <link name="tent_1">
+      <visual name="visual">
+        <geometry>
+          <mesh>
+          <uri>model://ddcr/media/tent_1.dae</uri>
+          <scale>0.25 0.25 0.25</scale>
+          </mesh>
+        </geometry>
+        <pose>102.5 358.30 2 -1.57 0 0</pose>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <mesh>
+          <uri>model://ddcr/media/tent_1.dae</uri>
+          <scale>0.25 0.25 0.25</scale>
+          </mesh>
+        </geometry>
+        <pose>102.5 358.30 2 -1.57 0 0</pose>
+      </collision>
+    </link>
+    </model>
+</sdf>
+

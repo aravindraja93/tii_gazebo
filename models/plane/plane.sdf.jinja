@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- Generated from plane.sdf.jinja -->
-{% set model_name = 'plane' if model_name == 'NotSet' else model_name %}
-{% set sdf_version = '1.5' if sdf_version == 'NotSet' else sdf_version %}
+{%- set model_name = 'plane' if model_name == 'NotSet' else model_name -%}
+{%- set sdf_version = '1.5' if sdf_version == 'NotSet' else sdf_version %}
 <sdf version='{{ sdf_version }}'>
   <model name='{{ model_name }}'>
     <pose>0 0 0.246 0 0 0</pose>
@@ -73,7 +73,7 @@
       </inertial>
     </link>
     <joint name='{{ model_name }}/imu_joint' type='revolute'>
-      <child>plane/imu_link</child>
+      <child>{{ model_name }}/imu_link</child>
       <parent>base_link</parent>
       <axis>
         <xyz>1 0 0</xyz>
@@ -90,38 +90,14 @@
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
     </joint>
-    <link name='{{ model_name }}/airspeed_link'>
+    <include>
+      <uri>model://airspeed</uri>
       <pose>0 0 0 0 0 0</pose>
-      <inertial>
-        <pose>0 0 0 0 0 0</pose>
-        <mass>0.015</mass>
-        <inertia>
-          <ixx>1e-05</ixx>
-          <ixy>0</ixy>
-          <ixz>0</ixz>
-          <iyy>1e-05</iyy>
-          <iyz>0</iyz>
-          <izz>1e-05</izz>
-        </inertia>
-      </inertial>
-    </link>
-    <joint name='{{ model_name }}/airspeed_joint' type='revolute'>
-      <child>plane/airspeed_link</child>
+      <name>airspeed</name>
+    </include>
+    <joint name='airspeed_joint' type='fixed'>
+      <child>airspeed::link</child>
       <parent>base_link</parent>
-      <axis>
-        <xyz>1 0 0</xyz>
-        <limit>
-          <lower>0</lower>
-          <upper>0</upper>
-          <effort>0</effort>
-          <velocity>0</velocity>
-        </limit>
-        <dynamics>
-          <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
-        </dynamics>
-        <use_parent_model_frame>1</use_parent_model_frame>
-      </axis>
     </joint>
     <link name='rotor_puller'>
       <pose>0.3 0 0.0 0 1.57 0</pose>
@@ -203,7 +179,7 @@
         </inertia>
         <pose>0 0.3 0 0.00 0 0.0</pose>
       </inertial>
-      <visual name='left_aileron_visual'>
+      <visual name='left_elevon_visual'>
         <pose>0.07 0.0 -0.08 0.00 0 0.0</pose>
         <geometry>
           <mesh>
@@ -219,7 +195,7 @@
         </material>
       </visual>
     </link>
-    <link name="right_aileron">
+    <link name="right_elevon">
       <inertial>
         <mass>0.00000001</mass>
         <inertia>
@@ -232,7 +208,7 @@
         </inertia>
         <pose>0 -0.3 0 0.00 0 0.0</pose>
       </inertial>
-      <visual name='right_aileron_visual'>
+      <visual name='right_elevon_visual'>
         <pose>0.07 0.0 -0.08 0.00 0 0.0</pose>
         <geometry>
           <mesh>
@@ -364,9 +340,9 @@
         </material>
       </visual>
     </link>
-    <joint name='left_aileron_joint' type='revolute'>
+    <joint name='left_elevon_joint' type='revolute'>
       <parent>base_link</parent>
-      <child>left_aileron</child>
+      <child>left_elevon</child>
       <pose>-0.07 0.4 0.08 0.00 0 0.0</pose>
       <axis>
         <xyz>0 1 0</xyz>
@@ -385,9 +361,9 @@
         </ode>
       </physics>
     </joint>
-    <joint name='right_aileron_joint' type='revolute'>
+    <joint name='right_elevon_joint' type='revolute'>
       <parent>base_link</parent>
-      <child>right_aileron</child>
+      <child>right_elevon</child>
       <pose>-0.07 -0.4 0.08 0.00 0 0.0</pose>
       <axis>
         <xyz>0 1 0</xyz>
@@ -490,22 +466,65 @@
         </ode>
       </physics>
     </joint>
-    <include>
-      <uri>model://gps</uri>
-      <pose>0 0 0 0 0 0</pose>
-      <name>gps</name>
-    </include>
-    <joint name='gps_joint' type='fixed'>
-      <child>gps::link</child>
+    <model name='gps2'>
+      <link name='link'>
+        <pose>0 0 0 0 0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>0.01</mass>
+          <inertia>
+            <ixx>2.1733e-06</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>2.1733e-06</iyy>
+            <iyz>0</iyz>
+            <izz>1.8e-07</izz>
+          </inertia>
+        </inertial>
+        <visual name='visual'>
+          <geometry>
+            <cylinder>
+              <radius>0.01</radius>
+              <length>0.002</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <script>
+              <name>Gazebo/Black</name>
+              <uri>__default__</uri>
+            </script>
+          </material>
+        </visual>
+        <sensor name='gps' type='gps'>
+          <pose>0 0 0 0 0 0</pose>
+          <plugin name='gps_plugin' filename='libgazebo_gps_plugin.so'>
+            <robotNamespace/>
+            <gpsNoise>1</gpsNoise>
+          {%- if gps_attack_time != 'NotSet' or  gps_attack_rate != 'NotSet' %}  
+            {%- set gps_attack_time = 30 if gps_attack_time == 'NotSet' else gps_attack_time -%}
+            {%- set gps_attack_rate = 0.1 if gps_attack_rate == 'NotSet' else gps_attack_rate %}
+            <gpsAttackTime>{{ gps_attack_time }}</gpsAttackTime>
+            <gpsAttackRate>{{ gps_attack_rate }}</gpsAttackRate>
+          {%- endif %}
+            <gpsXYRandomWalk>2.0</gpsXYRandomWalk>
+            <gpsZRandomWalk>4.0</gpsZRandomWalk>
+            <gpsXYNoiseDensity>0.0002</gpsXYNoiseDensity>
+            <gpsZNoiseDensity>0.0004</gpsZNoiseDensity>
+            <gpsVXYNoiseDensity>0.2</gpsVXYNoiseDensity>
+            <gpsVZNoiseDensity>0.4</gpsVZNoiseDensity>
+          </plugin>
+        </sensor>
+      </link>
+    </model>
+    <joint name='gps2_joint' type='fixed'>
       <parent>base_link</parent>
+      <child>gps2::link</child>
     </joint>
-    <plugin name="left_wing_liftdrag" filename="libLiftDragPlugin.so">
-      <alpha0>-0.009519322</alpha0>
-      <cd_alpha0>0.003</cd_alpha0>
-      <cm_alpha0>0.002072715</cm_alpha0>
+    <plugin name="left_wing" filename="libLiftDragPlugin.so">
+      <a0>0.05984281113</a0>
       <cla>4.752798721</cla>
-      <cda>0.35</cda>
-      <cma>0.02</cma>
+      <cda>0.6417112299</cda>
+      <cma>0.0</cma>
       <alpha_stall>0.3391428111</alpha_stall>
       <cla_stall>-3.85</cla_stall>
       <cda_stall>-0.9233984055</cda_stall>
@@ -517,21 +536,17 @@
       <upward>0 0 1</upward>
       <link_name>base_link</link_name>
       <control_joint_name>
-        left_aileron_joint
+        left_elevon_joint
       </control_joint_name>
-      <cl_delta>-0.5</cl_delta>
-      <cd_delta>0.05</cd_delta>
-      <cm_delta>0.005</cm_delta>
+      <control_joint_rad_to_cl>-0.5</control_joint_rad_to_cl>
       <robotNamespace></robotNamespace>
       <windSubTopic>world_wind</windSubTopic>
     </plugin>
-    <plugin name="right_wing_liftdrag" filename="libLiftDragPlugin.so">
-      <alpha0>-0.009519322</alpha0>
-      <cd_alpha0>0.003</cd_alpha0>
-      <cm_alpha0>0.002072715</cm_alpha0>
+    <plugin name="right_wing" filename="libLiftDragPlugin.so">
+      <a0>0.05984281113</a0>
       <cla>4.752798721</cla>
-      <cda>0.35</cda>
-      <cma>0.02</cma>
+      <cda>0.6417112299</cda>
+      <cma>0.0</cma>
       <alpha_stall>0.3391428111</alpha_stall>
       <cla_stall>-3.85</cla_stall>
       <cda_stall>-0.9233984055</cda_stall>
@@ -543,21 +558,17 @@
       <upward>0 0 1</upward>
       <link_name>base_link</link_name>
       <control_joint_name>
-        right_aileron_joint
+        right_elevon_joint
       </control_joint_name>
-      <cl_delta>-0.5</cl_delta>
-      <cd_delta>0.05</cd_delta>
-      <cm_delta>0.005</cm_delta>
+      <control_joint_rad_to_cl>-0.5</control_joint_rad_to_cl>
       <robotNamespace></robotNamespace>
       <windSubTopic>world_wind</windSubTopic>
     </plugin>
-    <plugin name="left_flap_liftdrag" filename="libLiftDragPlugin.so">
-      <alpha0>-0.009519322</alpha0>
-      <cd_alpha0>0.003</cd_alpha0>
-      <cm_alpha0>0.002072715</cm_alpha0>
+    <plugin name="left_flap" filename="libLiftDragPlugin.so">
+      <a0>0.05984281113</a0>
       <cla>4.752798721</cla>
-      <cda>0.35</cda>
-      <cma>0.02</cma>
+      <cda>0.6417112299</cda>
+      <cma>0.0</cma>
       <alpha_stall>0.3391428111</alpha_stall>
       <cla_stall>-3.85</cla_stall>
       <cda_stall>-0.9233984055</cda_stall>
@@ -571,19 +582,15 @@
       <control_joint_name>
         left_flap_joint
       </control_joint_name>
-      <cl_delta>-0.5</cl_delta>
-      <cd_delta>0.05</cd_delta>
-      <cm_delta>0.005</cm_delta>
+      <control_joint_rad_to_cl>-0.5</control_joint_rad_to_cl>
       <robotNamespace></robotNamespace>
       <windSubTopic>world_wind</windSubTopic>
     </plugin>
-    <plugin name="right_flap_liftdrag" filename="libLiftDragPlugin.so">
-      <alpha0>-0.009519322</alpha0>
-      <cd_alpha0>0.003</cd_alpha0>
-      <cm_alpha0>0.002072715</cm_alpha0>
+    <plugin name="right_flap" filename="libLiftDragPlugin.so">
+      <a0>0.05984281113</a0>
       <cla>4.752798721</cla>
-      <cda>0.35</cda>
-      <cma>0.02</cma>
+      <cda>0.6417112299</cda>
+      <cma>0.0</cma>
       <alpha_stall>0.3391428111</alpha_stall>
       <cla_stall>-3.85</cla_stall>
       <cda_stall>-0.9233984055</cda_stall>
@@ -597,14 +604,12 @@
       <control_joint_name>
         right_flap_joint
       </control_joint_name>
-      <cl_delta>-0.5</cl_delta>
-      <cd_delta>0.05</cd_delta>
-      <cm_delta>0.005</cm_delta>
+      <control_joint_rad_to_cl>-0.5</control_joint_rad_to_cl>
       <robotNamespace></robotNamespace>
       <windSubTopic>world_wind</windSubTopic>
     </plugin>
-    <plugin name="elevator_liftdrag" filename="libLiftDragPlugin.so">
-      <alpha0>-0.2</alpha0>
+    <plugin name="elevator" filename="libLiftDragPlugin.so">
+      <a0>-0.2</a0>
       <cla>4.752798721</cla>
       <cda>0.6417112299</cda>
       <cma>0.0</cma>
@@ -621,12 +626,12 @@
       <control_joint_name>
         elevator_joint
       </control_joint_name>
-      <cl_delta>-4.0</cl_delta>
+      <control_joint_rad_to_cl>-4.0</control_joint_rad_to_cl>
       <robotNamespace></robotNamespace>
       <windSubTopic>world_wind</windSubTopic>
     </plugin>
-    <plugin name="rudder_liftdrag" filename="libLiftDragPlugin.so">
-      <alpha0>0.0</alpha0>
+    <plugin name="rudder" filename="libLiftDragPlugin.so">
+      <a0>0.0</a0>
       <cla>4.752798721</cla>
       <cda>0.6417112299</cda>
       <cma>0.0</cma>
@@ -643,7 +648,7 @@
       <control_joint_name> 
          rudder_joint 
       </control_joint_name> 
-      <cl_delta>4.0</cl_delta>
+      <control_joint_rad_to_cl>4.0</control_joint_rad_to_cl>
       <robotNamespace></robotNamespace>
       <windSubTopic>world_wind</windSubTopic>
     </plugin>
@@ -668,7 +673,7 @@
     </plugin>
     <plugin name='gazebo_imu_plugin' filename='libgazebo_imu_plugin.so'>
       <robotNamespace></robotNamespace>
-      <linkName>plane/imu_link</linkName>
+      <linkName>{{ model_name }}/imu_link</linkName>
       <imuTopic>/imu</imuTopic>
       <gyroscopeNoiseDensity>0.0003394</gyroscopeNoiseDensity>
       <gyroscopeRandomWalk>3.8785e-05</gyroscopeRandomWalk>
@@ -695,12 +700,8 @@
       <pubRate>50</pubRate>
       <baroTopic>/baro</baroTopic>
     </plugin>
-    <plugin name='airspeed_plugin' filename='libgazebo_airspeed_plugin.so'>
-      <robotNamespace/>
-      <linkName>plane/airspeed_link</linkName>
-    </plugin>
     <plugin name='mavlink_interface' filename='libgazebo_mavlink_interface.so'>
-      <robotNamespace/>
+      <robotNamespace></robotNamespace>
       <imuSubTopic>/imu</imuSubTopic>
       <magSubTopic>/mag</magSubTopic>
       <baroSubTopic>/baro</baroSubTopic>
@@ -740,23 +741,23 @@
           <joint_control_type>velocity</joint_control_type>
           <joint_name>rotor_puller_joint</joint_name>
         </channel>
-        <channel name="left_aileron">
+        <channel name="left_elevon">
           <input_index>5</input_index>
           <input_offset>0</input_offset>
           <input_scaling>1</input_scaling>
           <zero_position_disarmed>0</zero_position_disarmed>
           <zero_position_armed>0</zero_position_armed>
           <joint_control_type>position_kinematic</joint_control_type>
-          <joint_name>left_aileron_joint</joint_name>
+          <joint_name>left_elevon_joint</joint_name>
         </channel>
-        <channel name="right_aileron">
+        <channel name="right_elevon">
           <input_index>6</input_index>
           <input_offset>0</input_offset>
           <input_scaling>1</input_scaling>
           <zero_position_disarmed>0</zero_position_disarmed>
           <zero_position_armed>0</zero_position_armed>
           <joint_control_type>position_kinematic</joint_control_type>
-          <joint_name>right_aileron_joint</joint_name>
+          <joint_name>right_elevon_joint</joint_name>
         </channel>
         <channel name="elevator">
           <input_index>7</input_index>

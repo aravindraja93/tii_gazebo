@@ -17,12 +17,15 @@ default_model_path = os.path.relpath(os.path.join(script_path, rel_model_path))
 default_sdf_dict = {
     "iris": 1.6,
     "plane": 1.5,
-    "standard_vtol": 1.5
+    "standard_vtol": 1.5,
+    "iris_simple": 1.6,
+    "ssrc_fog_x": 1.6
 }
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--base_model', default="NotSet", help="Base model jinja file EX: iris")
+    parser.add_argument('--controller', default="NotSet", help="Controller to use with model")
     parser.add_argument('--sdf_version', default="NotSet", help="SDF format version to use for interpreting model file")
     parser.add_argument('--mavlink_tcp_port', default=4560, help="TCP port for PX4 SITL")
     parser.add_argument('--mavlink_udp_port', default=14560, help="Mavlink UDP port for mavlink access")
@@ -32,9 +35,17 @@ if __name__ == "__main__":
     parser.add_argument('--serial_device', default="/dev/ttyACM0", help="Serial device for FMU")
     parser.add_argument('--serial_baudrate', default=921600, help="Baudrate of Serial device for FMU")
     parser.add_argument('--enable_lockstep', default="NotSet", help="Enable lockstep for simulation")
+    parser.add_argument('--gps_attack_time', default="NotSet", help="GPS attack time sec")
+    parser.add_argument('--gps_attack_rate', default="NotSet", help="GPS attack rate m/s")
+    parser.add_argument('--gps_model_name', default="NotSet", help="GPS model name")
+    parser.add_argument('--camera_image', default="NotSet", help="Name of camera image topic.")
+    parser.add_argument('--namespace', default="NotSet", help="Namespace of robot.")
     parser.add_argument('--hil_mode', default=0, help="Enable HIL mode for HITL simulation")
     parser.add_argument('--model_name', default="NotSet", help="Model to be used in jinja files")
     args = parser.parse_args()
+
+    if args.namespace == "":
+        args.namespace = "NotSet"
 
     if args.base_model not in default_sdf_dict:
         print("\nWARNING!!!")
@@ -51,6 +62,9 @@ if __name__ == "__main__":
         args.sdf_version = default_sdf_dict.get(args.base_model)
         
     input_filename = os.path.relpath(os.path.join(default_model_path, '{:s}/{:s}.sdf.jinja'.format(args.base_model,args.base_model)))
+    print("___________________________________ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff__")
+    print(input_filename)
+    print("_____________________________________")
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(default_env_path))
     template_model = env.get_template(os.path.relpath(input_filename, default_env_path))
     
@@ -61,6 +75,7 @@ if __name__ == "__main__":
         args.enable_lockstep=1
 
     d = {'sdf_version': args.sdf_version, \
+         'controller': args.controller, \
          'mavlink_tcp_port': args.mavlink_tcp_port, \
          'mavlink_udp_port': args.mavlink_udp_port, \
          'qgc_udp_port': args.qgc_udp_port, \
@@ -69,12 +84,56 @@ if __name__ == "__main__":
          'serial_device': args.serial_device, \
          'serial_baudrate': args.serial_baudrate, \
          'enable_lockstep': args.enable_lockstep, \
+         'gps_attack_time': args.gps_attack_time, \
+         'gps_attack_rate': args.gps_attack_rate, \
+         'gps_model_name': args.gps_model_name, \
          'model_name': args.model_name, \
+         'camera_image': args.camera_image, \
+         'namespace': args.namespace, \
          'hil_mode': args.hil_mode}
 
+    if (not os.path.isdir('/tmp/gazebo/models/{:s}'.format(args.model_name))):
+        try: 
+            os.makedirs('/tmp/gazebo/models/{:s}'.format(args.model_name), exist_ok = True) 
+        except OSError as error: 
+            print("Directory creation error.")
+
     model_result = template_model.render(d)
-    model_out = '/tmp/{:s}.sdf'.format(args.model_name)
+    model_out = '/tmp/gazebo/models/{:s}/{:s}.sdf'.format(args.model_name, args.model_name)
 
     with open(model_out, 'w') as m_out:
         print(('{:s} -> {:s}'.format(input_filename, model_out)))
         m_out.write(model_result)
+
+    input_config = os.path.relpath(os.path.join(script_path, 'model.config.jinja'))
+    template_config = env.get_template(os.path.relpath(input_config, default_env_path))
+    result_config = template_config.render(d)
+    out_config = '/tmp/gazebo/models/{:s}/model.config'.format(args.model_name)
+    with open(out_config, 'w') as c_out:
+        print(('{:s} -> {:s}'.format("scripts/model.config.jinja", out_config)))
+        c_out.write(result_config)
+
+if args.gps_model_name != "NotSet" and args.gps_model_name != "gps":
+        
+        if (not os.path.isdir('/tmp/gazebo/models/{:s}'.format(args.gps_model_name))):
+            try: 
+                os.makedirs('/tmp/gazebo/models/{:s}'.format(args.gps_model_name), exist_ok = True) 
+            except OSError as error: 
+                print("Directory creation error.")
+
+        input_gps = os.path.relpath(os.path.join(default_model_path, 'gps/gps.sdf.jinja'))
+        template_gps = env.get_template(os.path.relpath(input_gps, default_env_path))
+        gps_result = template_gps.render(d)
+        gps_out = '/tmp/gazebo/models/{:s}/{:s}.sdf'.format(args.gps_model_name, args.gps_model_name)
+        with open(gps_out, 'w') as g_out:
+            print(('{:s} -> {:s}'.format("gps/gps.sdf.jinja", gps_out)))
+            g_out.write(gps_result)
+        
+        input_gps_config = os.path.relpath(os.path.join(default_model_path, 'gps/model.config.jinja'))
+        template_gps_config = env.get_template(os.path.relpath(input_gps_config, default_env_path))
+        gps_result_config = template_gps_config.render(d)
+        gps_out_config = '/tmp/gazebo/models/{:s}/model.config'.format(args.gps_model_name)
+        with open(gps_out_config, 'w') as gc_out:
+            print(('{:s} -> {:s}'.format("gps/model.config.jinja", gps_out_config)))
+            gc_out.write(gps_result_config)
+

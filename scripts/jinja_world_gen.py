@@ -9,6 +9,7 @@ import argparse
 import os
 import numpy as np
 import datetime
+import ast
 
 rel_gazebo_path = ".."
 rel_world_path ="../worlds"
@@ -18,6 +19,7 @@ default_world_path = os.path.relpath(os.path.join(script_path, rel_world_path))
 default_filename = os.path.relpath(os.path.join(default_world_path, "gen.world.jinja"))
 default_sdf_world_dict = {
     "empty": 1.5,
+    "waypoint": 1.5,
     "mcmillan": 1.5,
     "ksql": 1.5,
     "irlock": 1.5,
@@ -28,7 +30,9 @@ default_sdf_world_dict = {
     "warehouse": 1.5,
     "typhoon": 1.5,
     "abu_dhabi": 1.5,
-    "raceway": 1.5
+    "raceway": 1.5,
+    "canvas": 1.5,
+    "ddcr": 1.5
 }
 
 if __name__ == "__main__":
@@ -37,23 +41,48 @@ if __name__ == "__main__":
     parser.add_argument('--sun_model', default="sunSolarNoon", help="Select sun model [sunSolarNoon, sunHighShadow, sunUTC, sunNone]")
     parser.add_argument('--sun_utc_date', default="1904_09_20_17_30", help="Date 'YYYY_MM_DD_hh_mm' with UTC time to calculate sunUTC values or 'Now' for your current UTC time.")
     parser.add_argument('--cloud_speed', default="NoClouds", help="Turn on clouds with given speed")
-    parser.add_argument('--shadows', default=1, help="Shadows on [1] or off [0]")
+    parser.add_argument('--shadows', default=0, help="Shadows on [1] or off [0]")
     parser.add_argument('--video_widget', default="NotSet", help="GUI video widget on [1] or off [0]")
     parser.add_argument('--update_rate', default=250, help="Real time update rate.")
     parser.add_argument('--wind_speed', default="NotSet", help="Turn on wind with given mean speed.")
+    parser.add_argument('--fog_params', default="NotSet", help="Dictionary of fog attributes (type, start_m, end_m, density).")
     parser.add_argument('--realtime_factor', default=1.0, help="Real time factor.")
     parser.add_argument('--world_name', default="NotSet", help="Name of world, see default_sdf_world_dict for options")
-    parser.add_argument('--ambient_light', default=0.5, help="Value for ambient light [0.0..1.0]")
-    parser.add_argument('--background_light', default=0.15, help="Value for background light [0.0..1.0]")
-    parser.add_argument('--spherical_coords', default="NotSet", help="Enable or disable spherical coordinates on [1] or off [0]")
-    parser.add_argument('--latitude', default=39.8039, help="Latitude for spherical coordinates and sunUTC calculation")
-    parser.add_argument('--longitude', default=-84.0606, help="Longitude for spherical coordinates and sunUTC calculation")
-    parser.add_argument('--altitude', default=244, help="Altitude for spherical coordinates")
-    parser.add_argument('--model_name', default="NotSet", help="Model to be used for hitl case in jinja world file")
-    parser.add_argument('--model_pose', default="NotSet", help="Pose: 'x y z r p y' of model")
-    parser.add_argument('--irlock_beacon_pose', default="NotSet", help="Pose: 'x y z r p y' of irlock beacon")
+    parser.add_argument('--ambient_light', default=0.4, help="Value for ambient light [0.0..1.0]")
+    parser.add_argument('--background_light', default=0.7, help="Value for background light [0.0..1.0]")
+    parser.add_argument('--use_spherical_coords', default="NotSet", help="Enable or disable spherical coordinates on [1] or off [0]")
+    parser.add_argument('--lat_lon_alt', default=[39.8039,-84.0606, 244], help="Latitude, Longitude, Altitude for spherical coordinates and sunUTC calculation")
+    parser.add_argument('--embedded_models', default="NotSet", help="Array of models with poses to be embedded in world file")
+    parser.add_argument('--set_physics', default=1, help="Enable or disable physics in world file, on [1] or off [0]")
+    parser.add_argument('--output_file', help="world output file")
     parser.add_argument('--ode_threads', default=2, help="Number of island threads to use for ODE.")
     args = parser.parse_args()
+
+    print('Generation script passed world name: "{:s}"'.format(args.world_name))
+
+
+    try:
+        deg_latitude, deg_lognitude, m_altitude = ast.literal_eval(str(args.lat_lon_alt))
+    except:
+        print("Failed to read passed lat_lon_alt")
+        deg_latitude, deg_lognitude, m_altitude = [39.8039, -84.0606, 244]
+        pass
+
+    if args.embedded_models != "NotSet":
+        try:
+            args.embedded_models = ast.literal_eval(args.embedded_models)
+        except:
+            print("Failed to read passed embedded_models dictionary")
+            args.embedded_models = "NotSet"
+            pass
+
+    if args.fog_params != "NotSet":
+        try:
+            args.fog_params = ast.literal_eval(args.fog_params)
+        except:
+            print("Failed to read passed fog_params dictionary")
+            args.fog_params = "NotSet"
+            pass
 
     if args.world_name not in default_sdf_world_dict:
         print("\nERROR!!!")
@@ -73,8 +102,9 @@ if __name__ == "__main__":
         try:
             import pysolar
         except ImportError:
-            pass
+            print("Failed to import pysolar - try installing with: \n\tsudo apt install python3-pysolar\n")
             args.sun_model = "sunNone"
+            pass
 
     if args.sun_model == "sunUTC":
         dateStringUTC = args.sun_utc_date
@@ -82,15 +112,15 @@ if __name__ == "__main__":
             dateUTC = datetime.datetime.now(datetime.timezone.utc)
         else:
             if len(dateStringUTC) != 16:
-                dateStringUTC='1904_09_20_17_30'
+                dateStringUTC='1904/09/20/17:30'
             YYYY = int(dateStringUTC[:4])
             MM = int(dateStringUTC[5:7])
             DD = int(dateStringUTC[8:10])
             hh = int(dateStringUTC[11:13])
             mm = int(dateStringUTC[14:16])
             dateUTC = datetime.datetime(YYYY, MM, DD, hh, mm, 0, 0, tzinfo=datetime.timezone.utc)
-        sunLatitude = float(args.latitude)
-        sunLongitude = float(args.longitude)
+        sunLatitude = float(deg_latitude)
+        sunLongitude = float(deg_lognitude)
         sunAzimuth = pysolar.solar.get_azimuth(sunLatitude, sunLongitude, dateUTC)
         sunAltitude = pysolar.solar.get_altitude(sunLatitude, sunLongitude, dateUTC)
         sunRadiation =  pysolar.radiation.get_radiation_direct(dateUTC, sunAltitude)
@@ -135,16 +165,29 @@ if __name__ == "__main__":
          'realtime_factor': args.realtime_factor, \
          'ambient_light': args.ambient_light, \
          'background_light': args.background_light, \
-         'spherical_coords': args.spherical_coords, \
-         'latitude': args.latitude, \
-         'altitude': args.altitude, \
-         'longitude': args.longitude, \
-         'irlock_beacon_pose': args.irlock_beacon_pose, \
+         'use_spherical_coords': args.use_spherical_coords, \
+         'latitude': deg_latitude, \
+         'longitude': deg_lognitude, \
+         'altitude': m_altitude, \
          'world_name': args.world_name, \
+         'embedded_models': args.embedded_models, \
+         'fog_params': args.fog_params, \
+         'set_physics': args.set_physics, \
          'ode_threads': args.ode_threads}
 
+        
+    
+    if (not os.path.isdir('/tmp/gazebo/worlds')):
+        try: 
+            os.makedirs('/tmp/gazebo/worlds', exist_ok = True) 
+        except OSError as error: 
+            print("Directory creation error.")
+
     result = template.render(d)
-    filename_out = '/tmp/{:s}.world'.format(args.world_name)
+    if args.output_file:
+        filename_out = args.output_file
+    else:
+        filename_out = '{:s}/{:s}.world'.format("/tmp/gazebo/worlds",args.world_name)
 
     with open(filename_out, 'w') as f_out:
         print(('{:s} -> {:s}'.format(default_filename, filename_out)))
