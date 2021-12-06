@@ -17,7 +17,9 @@ default_model_path = os.path.relpath(os.path.join(script_path, rel_model_path))
 default_sdf_dict = {
     "iris": 1.6,
     "plane": 1.5,
-    "standard_vtol": 1.5
+    "standard_vtol": 1.5,
+    "iris_simple": 1.6,
+    "ssrc_fog_x": 1.6
 }
 
 if __name__ == "__main__":
@@ -60,6 +62,9 @@ if __name__ == "__main__":
         args.sdf_version = default_sdf_dict.get(args.base_model)
         
     input_filename = os.path.relpath(os.path.join(default_model_path, '{:s}/{:s}.sdf.jinja'.format(args.base_model,args.base_model)))
+    print("___________________________________ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff__")
+    print(input_filename)
+    print("_____________________________________")
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(default_env_path))
     template_model = env.get_template(os.path.relpath(input_filename, default_env_path))
     
@@ -108,7 +113,7 @@ if __name__ == "__main__":
         print(('{:s} -> {:s}'.format("scripts/model.config.jinja", out_config)))
         c_out.write(result_config)
 
-    if args.gps_model_name != "NotSet" and args.gps_model_name != "gps":
+if args.gps_model_name != "NotSet" and args.gps_model_name != "gps":
         
         if (not os.path.isdir('/tmp/gazebo/models/{:s}'.format(args.gps_model_name))):
             try: 
@@ -131,3 +136,4 @@ if __name__ == "__main__":
         with open(gps_out_config, 'w') as gc_out:
             print(('{:s} -> {:s}'.format("gps/model.config.jinja", gps_out_config)))
             gc_out.write(gps_result_config)
+

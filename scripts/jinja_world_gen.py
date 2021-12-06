@@ -19,6 +19,7 @@ default_world_path = os.path.relpath(os.path.join(script_path, rel_world_path))
 default_filename = os.path.relpath(os.path.join(default_world_path, "gen.world.jinja"))
 default_sdf_world_dict = {
     "empty": 1.5,
+    "waypoint": 1.5,
     "mcmillan": 1.5,
     "ksql": 1.5,
     "irlock": 1.5,
@@ -30,7 +31,8 @@ default_sdf_world_dict = {
     "typhoon": 1.5,
     "abu_dhabi": 1.5,
     "raceway": 1.5,
-    "canvas": 1.5
+    "canvas": 1.5,
+    "ddcr": 1.5
 }
 
 if __name__ == "__main__":
@@ -39,15 +41,15 @@ if __name__ == "__main__":
     parser.add_argument('--sun_model', default="sunSolarNoon", help="Select sun model [sunSolarNoon, sunHighShadow, sunUTC, sunNone]")
     parser.add_argument('--sun_utc_date', default="1904_09_20_17_30", help="Date 'YYYY_MM_DD_hh_mm' with UTC time to calculate sunUTC values or 'Now' for your current UTC time.")
     parser.add_argument('--cloud_speed', default="NoClouds", help="Turn on clouds with given speed")
-    parser.add_argument('--shadows', default=1, help="Shadows on [1] or off [0]")
+    parser.add_argument('--shadows', default=0, help="Shadows on [1] or off [0]")
     parser.add_argument('--video_widget', default="NotSet", help="GUI video widget on [1] or off [0]")
     parser.add_argument('--update_rate', default=250, help="Real time update rate.")
     parser.add_argument('--wind_speed', default="NotSet", help="Turn on wind with given mean speed.")
     parser.add_argument('--fog_params', default="NotSet", help="Dictionary of fog attributes (type, start_m, end_m, density).")
     parser.add_argument('--realtime_factor', default=1.0, help="Real time factor.")
     parser.add_argument('--world_name', default="NotSet", help="Name of world, see default_sdf_world_dict for options")
-    parser.add_argument('--ambient_light', default=0.5, help="Value for ambient light [0.0..1.0]")
-    parser.add_argument('--background_light', default=0.15, help="Value for background light [0.0..1.0]")
+    parser.add_argument('--ambient_light', default=0.4, help="Value for ambient light [0.0..1.0]")
+    parser.add_argument('--background_light', default=0.7, help="Value for background light [0.0..1.0]")
     parser.add_argument('--use_spherical_coords', default="NotSet", help="Enable or disable spherical coordinates on [1] or off [0]")
     parser.add_argument('--lat_lon_alt', default=[39.8039,-84.0606, 244], help="Latitude, Longitude, Altitude for spherical coordinates and sunUTC calculation")
     parser.add_argument('--embedded_models', default="NotSet", help="Array of models with poses to be embedded in world file")
